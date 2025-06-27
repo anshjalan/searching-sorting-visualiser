@@ -63,6 +63,7 @@ const SortAlgo = {
           changeBarColor(data[j + 1], traverseColor);
           await timer(time);
           if (data[j] > data[j + 1]) {
+            //Swap
             temp = data[j];
             data[j] = data[j + 1];
             data[j + 1] = temp;
@@ -71,6 +72,7 @@ const SortAlgo = {
             swapBar(data);
             await timer(time);
           } else {
+            //Now data[j + 1] is max-element
             changeBarColor(data[j + 1], smallestColor);
           }
           changeBarColor(data[j], unsortedColor);
@@ -149,6 +151,69 @@ const SortAlgo = {
     // calling sort function here
     sort(this);
   },
+
+
+
+  insertionSort() {
+    // promise for async insertion sort with delay
+    const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+
+    // async function for insertion sort algorithm
+    async function sort(self) {
+      for (let i = 1; i < data.length; i++) {
+        // Stoping execution here if users wants to stop.
+        if (self.abort) {
+          self.abort = false;
+          return;
+        }
+        var key = data[i];
+        changeBarColor(key, smallestColor);
+
+        var j = i - 1;
+        await timer(time);
+        while (j >= 0 && data[j] > key) {
+          if (self.abort) {
+            self.abort = false;
+            return;
+          }
+
+          changeBarColor(data[j], traverseColor);
+          await timer(time);
+
+          temp = data[j];
+          data[j] = data[j + 1];
+          data[j + 1] = temp;
+
+          changeBarColor(data[j + 1], unsortedColor);
+          await timer(time);
+
+          changeBarColor(data[j], smallestColor);
+          j--;
+          swooshAudio.play();
+          swapBar(data);
+          await timer(time);
+        }
+
+        changeBarColor(data[j+1], unsortedColor);
+        await timer(time);
+        swapBar(data);
+        await timer(time); // then the created Promise can be awaited
+      }
+
+      // After complete sorting algorithm making all the bar green.
+      svg.selectAll("rect").style("fill", "#56b4d3");
+
+      completeAudio.play();
+      isSorting = false;
+      isFound = true;
+      togglePlay();
+    }
+    // calling sort function here
+    sort(this);
+  },
+
+
+
 
   //Merge Sort methods to perform merge sort algorithm
   mergeSort() {
@@ -240,6 +305,7 @@ function stopSorting() {
   const stopSorting = SortAlgo.sortStop.bind(SortAlgo);
   stopSorting();
 }
+
 function startSorting() {
   let algo = document.getElementById("get-algo").value;
   if (algo == "bubble-sort") {
@@ -251,6 +317,9 @@ function startSorting() {
   } else if (algo == "merge-sort") {
     const mergeSortStarted = SortAlgo.mergeSort.bind(SortAlgo);
     mergeSortStarted();
+  } else if (algo == "insertion-sort") {
+    const insertionSortStarted = SortAlgo.insertionSort.bind(SortAlgo);
+    insertionSortStarted();
   }
 }
 
